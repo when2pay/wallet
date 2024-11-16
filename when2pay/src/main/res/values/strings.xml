@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">when2pay</string>
+    <string name="servicedesc">When2Pay Wallet</string>
+    <string name="aiddescription">aiddescription</string>
+</resources>
