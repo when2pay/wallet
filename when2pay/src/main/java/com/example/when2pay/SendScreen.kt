@@ -81,6 +81,18 @@ fun SendScreen(navController: NavController) {
             ) {
                 Text("Send")
             }
+            Button(
+                onClick = { /* Implement send functionality */ },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Sqan QR Code")
+            }
+            Button(
+                onClick = { /* Implement send functionality */ },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Sqan NFC Tag")
+            }
         }
     }
 }

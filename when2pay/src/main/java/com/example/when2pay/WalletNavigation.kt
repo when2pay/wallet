@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.web3auth.core.Web3Auth
 
 @Composable
 fun WalletNavigation() {
@@ -13,6 +14,6 @@ fun WalletNavigation() {
         composable("wallet") { WalletScreen(navController) }
         composable("send") { SendScreen(navController) }
         composable("receive") { ReceiveScreen(navController) }
-        composable("settings") { SettingsScreen(navController) }
+        composable("settings") { SettingsScreen(navController)}
     }
 }
