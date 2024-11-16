@@ -11,13 +11,31 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONArray
+import org.json.JSONObject
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WalletScreen(navController: NavController) {
+fun WalletScreen(navController: NavController, sharedData: SharedViewModel) {
+    checkForENS(sharedData)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Wallet") },
+                title = { Text(sharedData.walletPageTitle) }, // TODO: replace this with ENS name if there's one
                 actions = {
                     IconButton(onClick = { navController.navigate("settings") }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
@@ -74,6 +92,42 @@ fun ChainBalanceItem(chain: Chain) {
             Text("Balance: ${chain.balance} ${chain.symbol}")
         }
     }
+}
+
+fun checkForENS(sharedData: SharedViewModel) {
+    val url = "https://wenpay.wenpay.workers.dev/address/0x798eC9984Cb047b9429809eDf35b8994822a3E3A" // TODO: put address here
+    val client = OkHttpClient()
+
+    val request = Request.Builder()
+        .url(url)
+        .build()
+
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            val response = client.newCall(request).execute()
+            val data = response.body?.string() ?: ""
+            val jsonArr = Json.parseToJsonElement(data).jsonArray
+            if(jsonArr is JsonArray){
+                val el = jsonArr[0];
+                if(el is JsonObject){
+                    val name = el["name"]?.jsonPrimitive?.contentOrNull
+                    if (name != null) {
+                        sharedData.walletPageTitle = name
+                    } else {
+                        handleENSCreation()
+                    }
+                }
+            }
+        } catch(e: Exception){
+            println(e)
+            handleENSCreation()
+        }
+    }
+
+}
+
+fun handleENSCreation(){
+    println("Ciao")
 }
 
 data class Chain(val name: String, val symbol: String, val balance: Double)

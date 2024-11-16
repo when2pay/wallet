@@ -9,7 +9,8 @@ import androidx.navigation.compose.rememberNavController
 fun WalletNavigation(
     onSendTransaction: (Double, String) -> Unit,
     onSignIn: () -> Unit,
-    isLoggedIn: Boolean
+    isLoggedIn: Boolean,
+    sharedData: SharedViewModel
 ) {
     val navController = rememberNavController()
 
@@ -21,7 +22,7 @@ fun WalletNavigation(
             LoginScreen(onSignIn = onSignIn)
         }
         composable("wallet") {
-            WalletScreen(navController)
+            WalletScreen(navController, sharedData)
         }
         composable("send") {
             SendScreen(navController, onSendTransaction)

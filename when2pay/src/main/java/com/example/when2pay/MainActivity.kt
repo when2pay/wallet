@@ -7,15 +7,25 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
 import com.example.when2pay.ui.theme.WalletTheme
 import com.web3auth.core.Web3Auth
 import com.web3auth.core.types.*
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
@@ -24,6 +34,10 @@ import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.crypto.TransactionEncoder
 import org.web3j.protocol.http.HttpService
 import java.util.concurrent.CompletableFuture
+
+class SharedViewModel : ViewModel() {
+    var walletPageTitle: String by mutableStateOf("My Wallet")
+}
 
 class MainActivity : ComponentActivity() {
     private val TAG = "MainActivity"
@@ -34,6 +48,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var credentials: Credentials
     private lateinit var loginParams: LoginParams
     private val rpcUrl = "https://rpc.ankr.com/eth_sepolia"
+    val sharedViewModel: SharedViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +83,8 @@ class MainActivity : ComponentActivity() {
                             WalletNavigation(
                                 onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
                                 onSignIn = { signIn() },
-                                isLoggedIn = true
+                                isLoggedIn = true,
+                                sharedData = sharedViewModel
                             )
                         }
                     }
@@ -84,7 +101,8 @@ class MainActivity : ComponentActivity() {
                     WalletNavigation(
                         onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
                         onSignIn = {signIn()},
-                        isLoggedIn = true
+                        isLoggedIn = true,
+                        sharedData = sharedViewModel
                     )
                 }
             }
