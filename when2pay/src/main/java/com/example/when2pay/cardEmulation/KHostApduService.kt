@@ -194,7 +194,7 @@ class KHostApduService : HostApduService() {
                 return message.toBigInteger().modPow(e.toBigInteger(), n.toBigInteger()).toInt()
             }
 
-            val encrypted = encrypt(challenge.toInt(), Pair(e,n)).toString();
+            val encrypted = encrypt(challenge.toInt(), Pair(e,n)).toString(); // TODO: test this
 
             val response = ByteArray(encrypted.length + A_OKAY.size)
             System.arraycopy(A_OKAY, 0, response, 0, A_OKAY.size)

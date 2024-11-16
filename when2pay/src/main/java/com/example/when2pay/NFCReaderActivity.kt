@@ -180,6 +180,7 @@ class NFCReaderActivity : ComponentActivity() {
                     Log.wtf(TAG, "Error while authenticating with the app!")
                 }
 
+                // TODO: test this
                 val sendChallenge: ByteArray = byteArrayOf(0x12.toByte(),0x34.toByte(),challenge.toByte())
                 result = isoDep.transceive(sendChallenge)
                 if (!(result[0] == 0x6A.toByte() && result[1] == 0x82.toByte())) {
