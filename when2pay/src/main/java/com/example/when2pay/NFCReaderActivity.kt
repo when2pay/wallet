@@ -2,7 +2,6 @@ package com.example.when2pay
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
@@ -31,16 +30,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.when2pay.parser.NDEFTools
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.IOException
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class NFCReaderActivity : ComponentActivity() {
     private val TAG = "NFCReaderActivity"
 
     private var nfcAdapter: NfcAdapter? = null
     private var currentTag: Tag? = null
+    private var challenge: Int = 0;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        getChallengeHTTPRequest()
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
 
@@ -85,7 +96,7 @@ class NFCReaderActivity : ComponentActivity() {
 
                             // Display text "BTC Receiver"
                             Text(
-                                text = "BTC\nReceiver",
+                                text = "KYC\nReceiver",
                                 textAlign = TextAlign.Center,
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.ExtraBold,
@@ -95,26 +106,6 @@ class NFCReaderActivity : ComponentActivity() {
                     }
                 }
             }
-
-
-            /*
-            setContent {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "BTC\nReceiver",
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 56.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    }
-                }
-            }
-            */
         }
     }
 
@@ -138,10 +129,39 @@ class NFCReaderActivity : ComponentActivity() {
         nfcAdapter?.disableForegroundDispatch(this)
     }
 
-    private fun processGottenURL(url: String) {
-        // Now create the button with the hyperlink
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        startActivity(browserIntent)
+    private fun getChallengeHTTPRequest() {
+        val url = "https://hack.zurini.dev/getChallenge"
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val response = client.newCall(request).execute()
+                val data = response.body?.string() ?: ""
+                val jsonElement = Json.parseToJsonElement(data)
+                if (jsonElement is JsonObject) {
+                    val chg = jsonElement["challenge"]?.jsonPrimitive?.intOrNull
+                    if (chg != null) {
+                        challenge = chg
+                    }
+                }
+
+            } catch(e: Exception){
+                println(e)
+            }
+        }
+
+
+    }
+
+
+    private fun processGottenData(address: String) {
+        // At this point we have the address that the KYC should be verified for
+        // TODO
+
     }
 
     val SelectAID: ByteArray = byteArrayOf(0xF0.toByte(), 0x39.toByte(), 0x41.toByte(), 0x48.toByte(), 0x14.toByte(), 0x81.toByte(), 0x00.toByte())
@@ -155,10 +175,22 @@ class NFCReaderActivity : ComponentActivity() {
         if (isoDep != null) {
             try {
                 isoDep.connect()
-                val result = isoDep.transceive(selectApdu(SelectAID))
+                var result = isoDep.transceive(selectApdu(SelectAID))
                 if (!(result[0] == 0x6A.toByte() && result[1] == 0x82.toByte())) {
                     Log.wtf(TAG, "Error while authenticating with the app!")
                 }
+
+                // TODO: test this
+                val sendChallenge: ByteArray = byteArrayOf(0x12.toByte(),0x34.toByte(),challenge.toByte())
+                result = isoDep.transceive(sendChallenge)
+                if (!(result[0] == 0x6A.toByte() && result[1] == 0x82.toByte())) {
+                    Log.wtf(TAG, "Error while authenticating with the app!")
+                }
+
+                // Parse from result[2] onwards
+                val numberString = result.sliceArray(2..6).toString(Charsets.UTF_8)
+                var number=numberString.toInt();
+                println(number)
 
                 val readResult = isoDep.transceive(readBinaryAPDU())
                 if (!(readResult[readResult.size - 2] == 0x90.toByte() && readResult[readResult.size - 1] == 0x00.toByte())) {
@@ -167,7 +199,7 @@ class NFCReaderActivity : ComponentActivity() {
                 val output = NDEFTools.ExtractTextFromNDEF(readResult)
                 Log.i(TAG, "Output: $output")
 
-                processGottenURL(output)
+                processGottenData(output)
 
             } catch (ex: IOException) {
                 Log.e(TAG, "IOException: ${ex.message}")
