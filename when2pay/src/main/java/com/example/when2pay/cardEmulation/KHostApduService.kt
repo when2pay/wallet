@@ -181,6 +181,28 @@ class KHostApduService : HostApduService() {
             return response
         }
 
+        if(commandApdu[0] == 0x12.toByte() && commandApdu[1] == 0x34.toByte()) {
+            val challenge = commandApdu[2];
+            val e = 65537
+            val n =3233
+
+            fun encrypt(message: Int, publicKey: Pair<Int, Int>): Int {
+                /**
+                 * Encrypt a message using the public key.
+                 */
+                val (e, n) = publicKey
+                return message.toBigInteger().modPow(e.toBigInteger(), n.toBigInteger()).toInt()
+            }
+
+            val encrypted = encrypt(challenge.toInt(), Pair(e,n)).toString();
+
+            val response = ByteArray(encrypted.length + A_OKAY.size)
+            System.arraycopy(A_OKAY, 0, response, 0, A_OKAY.size)
+            System.arraycopy(encrypted, 0, response, A_OKAY.size, encrypted.length)
+
+            return response
+        }
+
         if (commandApdu.sliceArray(0..1).contentEquals(NDEF_READ_BINARY)) {
             val offset = commandApdu.sliceArray(2..3).toHex().toInt(16)
             val length = commandApdu.sliceArray(4..4).toHex().toInt(16)

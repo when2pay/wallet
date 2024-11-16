@@ -180,11 +180,16 @@ class NFCReaderActivity : ComponentActivity() {
                     Log.wtf(TAG, "Error while authenticating with the app!")
                 }
 
-                val sendChallenge: ByteArray = byteArrayOf(0x00.toByte(),challenge.toByte())
+                val sendChallenge: ByteArray = byteArrayOf(0x12.toByte(),0x34.toByte(),challenge.toByte())
                 result = isoDep.transceive(sendChallenge)
                 if (!(result[0] == 0x6A.toByte() && result[1] == 0x82.toByte())) {
                     Log.wtf(TAG, "Error while authenticating with the app!")
                 }
+
+                // Parse from result[2] onwards
+                val numberString = result.sliceArray(2..6).toString(Charsets.UTF_8)
+                var number=numberString.toInt();
+                println(number)
 
                 val readResult = isoDep.transceive(readBinaryAPDU())
                 if (!(readResult[readResult.size - 2] == 0x90.toByte() && readResult[readResult.size - 1] == 0x00.toByte())) {
