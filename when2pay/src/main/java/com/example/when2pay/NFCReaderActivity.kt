@@ -85,7 +85,7 @@ class NFCReaderActivity : ComponentActivity() {
 
                             // Display text "BTC Receiver"
                             Text(
-                                text = "BTC\nReceiver",
+                                text = "KYC\nReceiver",
                                 textAlign = TextAlign.Center,
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.ExtraBold,
@@ -95,26 +95,6 @@ class NFCReaderActivity : ComponentActivity() {
                     }
                 }
             }
-
-
-            /*
-            setContent {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "BTC\nReceiver",
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 56.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    }
-                }
-            }
-            */
         }
     }
 

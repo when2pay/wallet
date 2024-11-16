@@ -92,7 +92,7 @@ class HCEActivity : ComponentActivity() {
 
                             // Display text "BTC Receiver"
                             Text(
-                                text = "BTC\nTransmitter",
+                                text = "KYC\nTransmitter",
                                 textAlign = TextAlign.Center,
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.ExtraBold,
@@ -117,39 +117,6 @@ class HCEActivity : ComponentActivity() {
                 }
             }
         }
-/*
-        setContent {
-            Surface(modifier = Modifier.fillMaxSize()) {
-                Column {
-                    Text(nfcMessage)
-                    TextField(
-                        value = address,
-                        onValueChange = { address = it },
-                        label = { Text("Address where to receive the payment") }
-                    )
-                    TextField(
-                        value = amount,
-                        onValueChange = { amount = it },
-                        label = { Text("Amount to be paid") }
-                    )
-                    /*
-                    TextField(
-                        value = chainID,
-                        onValueChange = { chainID = it },
-                        label = { Text("chainID") }
-                    )
-                    */
-                    Button(
-                        onClick={
-                            setNFCMessage()
-                        }
-                    ) {
-                        Text("Set the message")
-                    }
-                }
-                // TODO: Shazam should add here the GUI information for when the transaction has been made as well as for WalletConnect
-            }
-        }*/
     }
 
     private fun supportNfcHceFeature() =
