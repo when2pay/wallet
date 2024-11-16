@@ -44,7 +44,7 @@ fun SettingsScreen(navController: NavController) {
                 Text("Change Password")
             }
 
-            Button(onClick = { /* Implement logout functionality */ }) {
+            Button(onClick = {  }) {
                 Text("Logout")
             }
         }

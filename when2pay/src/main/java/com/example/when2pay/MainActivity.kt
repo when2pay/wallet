@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -18,10 +19,11 @@ import com.google.gson.Gson
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
-import org.web3j.crypto.Hash
 import org.web3j.crypto.RawTransaction
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.crypto.TransactionEncoder
+import org.web3j.protocol.http.HttpService
+import java.util.concurrent.CompletableFuture
 
 class MainActivity : ComponentActivity() {
     private val TAG = "MainActivity"
@@ -33,39 +35,22 @@ class MainActivity : ComponentActivity() {
     private lateinit var loginParams: LoginParams
     private val rpcUrl = "https://rpc.ankr.com/eth_sepolia"
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Initialize Web3Auth
+        web3 = Web3j.build(HttpService(rpcUrl))
         web3Auth = Web3Auth(
             Web3AuthOptions(
                 context = this,
-                clientId = getString(R.string.web3auth_project_id), // Your Web3Auth Client ID
-                network = Network.SAPPHIRE_MAINNET, // MAINNET/TESTNET/CYAN
+                clientId = getString(R.string.web3auth_project_id),
+                network = Network.SAPPHIRE_DEVNET, // pass over the network you want to use (MAINNET or TESTNET or CYAN, AQUA, SAPPHIRE_MAINNET or SAPPHIRE_TESTNET)
                 buildEnv = BuildEnv.PRODUCTION,
                 redirectUrl = Uri.parse("com.example.when2pay://auth"),
-                whiteLabel = WhiteLabelData(
-                    "Web3Auth Integration",
-                    null,
-                    "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                    "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                    Language.EN,
-                    ThemeModes.LIGHT,
-                    true,
-                    hashMapOf("primary" to "#eb5424")
-                )
+                sessionTime = 172800
             )
         )
-
         // Define login parameters
-        loginParams = LoginParams(
-            Provider.JWT,
-            extraLoginOptions = ExtraLoginOptions(
-                domain = "https://web3auth.au.auth0.com",
-                verifierIdField = "sub"
-            )
-        )
 
         // Initialize Web3Auth session
         web3Auth.setResultUrl(intent?.data)
@@ -73,8 +58,20 @@ class MainActivity : ComponentActivity() {
         sessionResponse.whenComplete { _, error ->
             if (error == null) {
                 val privateKey = web3Auth.getPrivkey()
-                credentials = Credentials.create(privateKey)
                 Log.d(TAG, "Web3Auth Private Key: $privateKey")
+                credentials = Credentials.create(privateKey)
+                this.web3 = Web3j.build(HttpService(rpcUrl))
+                setContent {
+                    WalletTheme {
+                        Surface(modifier = Modifier.fillMaxSize()) {
+                            WalletNavigation(
+                                onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
+                                onSignIn = { signIn() },
+                                isLoggedIn = true
+                            )
+                        }
+                    }
+                }
             } else {
                 Log.e(TAG, "Web3Auth Error: ${error.message}")
             }
@@ -86,8 +83,8 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     WalletNavigation(
                         onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
-                        onSignIn = { signIn() },
-                        isLoggedIn = ::isLoggedIn
+                        onSignIn = {signIn()},
+                        isLoggedIn = true
                     )
                 }
             }
@@ -95,21 +92,36 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun signIn() {
-        val loginFuture = web3Auth.login(loginParams)
-        loginFuture.whenComplete { response, error ->
+        val email = "shahryarbahmeie@gmail.com"
+        // IMP START - Login
+        val selectedLoginProvider = Provider.EMAIL_PASSWORDLESS   // Can be GOOGLE, FACEBOOK, TWITCH etc.
+
+        val loginParams = LoginParams(selectedLoginProvider, extraLoginOptions = ExtraLoginOptions(login_hint = email))
+        val loginCompletableFuture: CompletableFuture<Web3AuthResponse> =
+            web3Auth.login(loginParams)
+        // IMP END - Login
+
+        loginCompletableFuture.whenComplete { _, error ->
             if (error == null) {
+                // Set the sessionId from Web3Auth in App State
+                // This will be used when making blockchain calls with Web3j
+                Log.d("MainActivity_Web3Auth", "Login Success")
                 credentials = Credentials.create(web3Auth.getPrivkey())
-                Log.d(TAG, "Login Successful: ${gson.toJson(response)}")
+                web3 = Web3j.build(HttpService(rpcUrl))
+                recreate()
             } else {
-                Log.e(TAG, "Login Failed: ${error.message}")
+                Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
             }
         }
     }
-    private fun isLoggedIn(): Boolean {
-        return web3Auth.getPrivkey()?.isNotEmpty() == true
+    override fun onResume() {
+        super.onResume()
+        if (Web3Auth.getCustomTabsClosed()) {
+            Toast.makeText(this, "User closed the browser.", Toast.LENGTH_SHORT).show()
+            web3Auth.setResultUrl(null)
+            Web3Auth.setCustomTabsClosed(false)
+        }
     }
-
-
     private fun sendTransaction(amount: Double, recipientAddress: String): String? {
         return try {
             Log.e("SendTransaction", "Tx Error: ${amount}: $recipientAddress")
@@ -146,5 +158,4 @@ class MainActivity : ComponentActivity() {
             null
         }
     }
-
 }
