@@ -12,8 +12,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SendScreen(navController: NavController) {
-    var recipient by remember { mutableStateOf("") }
+fun SendScreen(navController: NavController, onSendTransaction: (Double, String) -> Unit) {
+    var recipient by remember { mutableStateOf("0x7c00dC7574605bb50ada16E75CC797eC7f17B7FE") }
     var amount by remember { mutableStateOf("") }
     var selectedChain by remember { mutableStateOf(getSupportedChains().first()) }
 
@@ -76,7 +76,7 @@ fun SendScreen(navController: NavController) {
             }
 
             Button(
-                onClick = { /* Implement send functionality */ },
+                onClick = { onSendTransaction(amount.toDouble(), recipient) },
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text("Send")
