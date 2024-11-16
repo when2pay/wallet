@@ -72,4 +72,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.1") // Check for the latest version
     implementation("androidx.compose.material:material-icons-core:1.5.1") // Core material icons
     implementation("androidx.compose.material:material-icons-extended:1.5.1") // Optional extended set
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+
+
 }
