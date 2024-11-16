@@ -66,31 +66,31 @@ class MainActivity : ComponentActivity() {
                 sessionTime = 172800
             )
         )
-        // Define login parameters
+        // IMP END - Initialize Web3Auth
 
-        // Initialize Web3Auth session
+        // Handle user signing in when app is not alive
         web3Auth.setResultUrl(intent?.data)
-        val sessionResponse = web3Auth.initialize()
+        // Call initialize() in onCreate() to check for any existing session.
+        val sessionResponse: CompletableFuture<Void> = web3Auth.initialize()
         sessionResponse.whenComplete { _, error ->
             if (error == null) {
-                val privateKey = web3Auth.getPrivkey()
-                Log.d(TAG, "Web3Auth Private Key: $privateKey")
-                credentials = Credentials.create(privateKey)
-                this.web3 = Web3j.build(HttpService(rpcUrl))
+                credentials = Credentials.create(web3Auth.getPrivkey())
+                web3 = Web3j.build(HttpService(rpcUrl))
                 setContent {
                     WalletTheme {
                         Surface(modifier = Modifier.fillMaxSize()) {
                             WalletNavigation(
                                 onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
-                                onSignIn = { signIn() },
-                                isLoggedIn = true,
+                                onSignIn = { signIn(it) },
+                                isLoggedIn = web3Auth.getPrivkey().isNotEmpty()
                                 sharedData = sharedViewModel
                             )
                         }
                     }
                 }
             } else {
-                Log.e(TAG, "Web3Auth Error: ${error.message}")
+                Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
+                // Ideally, you should initiate the login function here.
             }
         }
 
@@ -100,8 +100,8 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     WalletNavigation(
                         onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
-                        onSignIn = {signIn()},
-                        isLoggedIn = true,
+                        onSignIn = {signIn(it)},
+                        isLoggedIn = web3Auth.getPrivkey().isNotEmpty()
                         sharedData = sharedViewModel
                     )
                 }
@@ -109,27 +109,34 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun signIn() {
-        val email = "shahryarbahmeie@gmail.com"
-        // IMP START - Login
+    private fun signIn(email: String): CompletableFuture<Unit> {
         val selectedLoginProvider = Provider.EMAIL_PASSWORDLESS   // Can be GOOGLE, FACEBOOK, TWITCH etc.
 
-        val loginParams = LoginParams(selectedLoginProvider, extraLoginOptions = ExtraLoginOptions(login_hint = email))
-        val loginCompletableFuture: CompletableFuture<Web3AuthResponse> =
-            web3Auth.login(loginParams)
-        // IMP END - Login
+        val loginParams = LoginParams(selectedLoginProvider, extraLoginOptions = ExtraLoginOptions(login_hint = email), redirectUrl = Uri.parse("com.example.when2pay://auth"))
 
-        loginCompletableFuture.whenComplete { _, error ->
-            if (error == null) {
-                // Set the sessionId from Web3Auth in App State
-                // This will be used when making blockchain calls with Web3j
-                Log.d("MainActivity_Web3Auth", "Login Success")
-                credentials = Credentials.create(web3Auth.getPrivkey())
-                web3 = Web3j.build(HttpService(rpcUrl))
-                recreate()
-            } else {
-                Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
-            }
+        return web3Auth.login(loginParams).thenApply { response ->
+            Log.d(TAG, "Login Successful: ${gson.toJson(response)}")
+
+            // Set the sessionId from Web3Auth in App State
+            // This will be used when making blockchain calls with Web3j
+            Log.d("MainActivity_Web3Auth", "Login Success")
+            credentials = Credentials.create(web3Auth.getPrivkey())
+            web3 = Web3j.build(HttpService(rpcUrl))
+            recreate()
+        }.exceptionally { error ->
+            Log.d("MainActivity_Web3Auth", error.message ?: "Something went wrong")
+        }
+    }
+    override fun onNewIntent(intent: Intent) {
+        if (intent != null) {
+            super.onNewIntent(intent)
+        }
+
+        Log.d(TAG, "onNewIntent called with intent: $intent")
+
+        intent?.data?.let { uri ->
+            Log.d(TAG, "Received URI in onNewIntent: $uri")
+            web3Auth.setResultUrl(uri)
         }
     }
     override fun onResume() {
