@@ -66,4 +66,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.web3auth.android.sdk)
+    implementation(libs.core)
+    implementation(libs.gson)
+    implementation("androidx.navigation:navigation-compose:2.7.1") // Check for the latest version
+    implementation("androidx.compose.material:material-icons-core:1.5.1") // Core material icons
+    implementation("androidx.compose.material:material-icons-extended:1.5.1") // Optional extended set
 }

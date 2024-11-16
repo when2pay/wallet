@@ -7,22 +7,28 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.when2pay.ui.theme.WalletTheme
+import com.web3auth.core.Web3Auth
+import com.web3auth.core.types.*
+import org.web3j.crypto.Credentials
+import org.web3j.protocol.Web3j
+import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
     private val TAG = "MainActivity"
+    private lateinit var web3Auth: Web3Auth
+
+    private val gson = Gson()
+    private lateinit var web3: Web3j
+    private lateinit var credentials: Credentials
+    private lateinit var loginParams: LoginParams
+    private val rpcUrl = "https://rpc.ankr.com/eth_sepolia"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // val action: String? = intent?.action
         try {
             val data: Uri? = intent?.data
             val dataToSend = data.toString().substring(14)
@@ -40,21 +46,9 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    MainScreen()
+                    WalletNavigation()
                 }
             }
         }
-    }
-}
-
-@Composable
-fun MainScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Hello World")
     }
 }
