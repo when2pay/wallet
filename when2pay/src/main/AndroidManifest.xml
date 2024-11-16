@@ -54,7 +54,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- Accept URIs: {YOUR_APP_PACKAGE_NAME}://* -->
-                <data android:scheme="com.example.when2pay" />
+                <data android:scheme="com.example.when2pay" android:host="auth" />
             </intent-filter>
 
 

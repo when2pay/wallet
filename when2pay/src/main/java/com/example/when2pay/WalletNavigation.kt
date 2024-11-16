@@ -5,10 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import java.util.concurrent.CompletableFuture
+
 @Composable
 fun WalletNavigation(
     onSendTransaction: (Double, String) -> Unit,
-    onSignIn: () -> Unit,
+    onSignIn: (email: String) -> CompletableFuture<Unit>,
     isLoggedIn: Boolean
 ) {
     val navController = rememberNavController()
@@ -18,7 +20,7 @@ fun WalletNavigation(
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable("login") {
-            LoginScreen(onSignIn = onSignIn)
+            LoginScreen(onSignIn)
         }
         composable("wallet") {
             WalletScreen(navController)
