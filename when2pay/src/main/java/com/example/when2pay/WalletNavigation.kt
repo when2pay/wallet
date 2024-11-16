@@ -1,5 +1,6 @@
 package com.example.when2pay
 
+import ENSScreen
 import LoginScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -32,6 +33,9 @@ fun WalletNavigation(
         }
         composable("settings") {
             SettingsScreen(navController)
+        }
+        composable("ENS") {
+            ENSScreen(navController)
         }
     }
 }

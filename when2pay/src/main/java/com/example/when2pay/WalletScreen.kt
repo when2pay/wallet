@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -27,17 +28,26 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 
+
+var sharedData: SharedViewModel? = null;
+var navController: NavController? = null
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WalletScreen(navController: NavController, sharedData: SharedViewModel) {
-    checkForENS(sharedData)
+fun WalletScreen(_navController: NavController, _sharedData: SharedViewModel) {
+    navController = _navController
+    sharedData = _sharedData
+
+    checkForENS(handleENSCreation = {
+        _navController.navigate("ENS")
+    })
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(sharedData.walletPageTitle) }, // TODO: replace this with ENS name if there's one
+                title = { Text(sharedData!!.walletPageTitle) }, // TODO: replace this with ENS name if there's one
                 actions = {
-                    IconButton(onClick = { navController.navigate("settings") }) {
+                    IconButton(onClick = { _navController.navigate("settings") }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 }
@@ -49,10 +59,10 @@ fun WalletScreen(navController: NavController, sharedData: SharedViewModel) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Button(onClick = { navController.navigate("send") }) {
+                    Button(onClick = { _navController.navigate("send") }) {
                         Text("Send")
                     }
-                    Button(onClick = { navController.navigate("receive") }) {
+                    Button(onClick = { _navController.navigate("receive") }) {
                         Text("Receive")
                     }
                 }
@@ -94,8 +104,8 @@ fun ChainBalanceItem(chain: Chain) {
     }
 }
 
-fun checkForENS(sharedData: SharedViewModel) {
-    val url = "https://wenpay.wenpay.workers.dev/address/0x798eC9984Cb047b9429809eDf35b8994822a3E3A" // TODO: put address here
+fun checkForENS(handleENSCreation : () -> Unit) {
+    val url = "https://wenpay.wenpay.workers.dev/address/0x798eC9984Cb047b9429809eDf35b8994822a3E3" // TODO: put address here
     val client = OkHttpClient()
 
     val request = Request.Builder()
@@ -112,7 +122,7 @@ fun checkForENS(sharedData: SharedViewModel) {
                 if(el is JsonObject){
                     val name = el["name"]?.jsonPrimitive?.contentOrNull
                     if (name != null) {
-                        sharedData.walletPageTitle = name
+                        sharedData?.walletPageTitle  = name
                     } else {
                         handleENSCreation()
                     }
@@ -124,10 +134,6 @@ fun checkForENS(sharedData: SharedViewModel) {
         }
     }
 
-}
-
-fun handleENSCreation(){
-    println("Ciao")
 }
 
 data class Chain(val name: String, val symbol: String, val balance: Double)
