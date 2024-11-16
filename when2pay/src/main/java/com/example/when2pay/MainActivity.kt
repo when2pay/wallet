@@ -37,6 +37,7 @@ import java.util.concurrent.CompletableFuture
 
 class SharedViewModel : ViewModel() {
     var walletPageTitle: String by mutableStateOf("My Wallet")
+    var ensName: String by mutableStateOf("")
 }
 
 class MainActivity : ComponentActivity() {
@@ -82,7 +83,7 @@ class MainActivity : ComponentActivity() {
                             WalletNavigation(
                                 onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
                                 onSignIn = { signIn(it) },
-                                isLoggedIn = web3Auth.getPrivkey().isNotEmpty()
+                                isLoggedIn = web3Auth.getPrivkey().isNotEmpty(),
                                 sharedData = sharedViewModel
                             )
                         }
@@ -101,7 +102,7 @@ class MainActivity : ComponentActivity() {
                     WalletNavigation(
                         onSendTransaction = { amount, recipient -> sendTransaction(amount, recipient) },
                         onSignIn = {signIn(it)},
-                        isLoggedIn = web3Auth.getPrivkey().isNotEmpty()
+                        isLoggedIn = web3Auth.getPrivkey().isNotEmpty(),
                         sharedData = sharedViewModel
                     )
                 }

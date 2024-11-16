@@ -37,7 +37,7 @@ fun WalletNavigation(
             SettingsScreen(navController)
         }
         composable("ENS") {
-            ENSScreen(navController)
+            ENSScreen(navController, sharedData)
         }
     }
 }

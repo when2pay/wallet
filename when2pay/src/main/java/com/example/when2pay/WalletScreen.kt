@@ -1,5 +1,7 @@
 package com.example.when2pay
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,7 +41,9 @@ fun WalletScreen(_navController: NavController, _sharedData: SharedViewModel) {
     sharedData = _sharedData
 
     checkForENS(handleENSCreation = {
-        _navController.navigate("ENS")
+        Handler(Looper.getMainLooper()).post {
+            _navController.navigate("ENS")
+        }
     })
 
     Scaffold(
