@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+<<<<<<< HEAD
+=======
+node_modules/
+**/node_modules/
+>>>>>>> ENS

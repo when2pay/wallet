@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">when2pay</string>
+    <string name="servicedesc">When2Pay Wallet</string>
+    <string name="aiddescription">aiddescription</string>
+    <string name="web3auth_project_id">BALwUeunT-jbvOXHfgDimJOItskTbPBmFpjEME1NzbH54rRf1_OP1xv1t3j5RXPSTrLcdy-J-jjCZwFk1Le5EVc</string>
+    <string name="web3auth_auth0_client_id">KgEoBhiqDvYdNOaBeoGzXjqty0k2WB2E</string>
+    <string name="web3auth_android_demo">When2Pay</string>
+</resources>
