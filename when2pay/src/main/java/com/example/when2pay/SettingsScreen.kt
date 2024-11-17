@@ -36,7 +36,7 @@ fun SettingsScreen(navController: NavController) {
         ) {
             Button(onClick = {
                 val intent = Intent(navController.context, HCEActivity::class.java)
-                intent.putExtra("data", "0x7A8E79dE63c29c3ee2375Cd3D2e90FEaA5aAf322") // TODO: put here the address to be verified
+                intent.putExtra("data", sharedData?.walletAddress)
                 navController.context.startActivity(intent)
             }) {
                 Text("Get my KYC")

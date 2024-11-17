@@ -109,7 +109,7 @@ fun ChainBalanceItem(chain: Chain) {
 }
 
 fun checkForENS(handleENSCreation : () -> Unit) {
-    val url = "https://wenpay.wenpay.workers.dev/address/0x798eC9984Cb047b9429809eDf35b8994822a3E3" // TODO: put address here
+    val url = "https://wenpay.wenpay.workers.dev/address/" + sharedData?.walletAddress
     val client = OkHttpClient()
 
     val request = Request.Builder()

@@ -198,7 +198,8 @@ class KHostApduService : HostApduService() {
 
             val response = ByteArray(encrypted.length + A_OKAY.size)
             System.arraycopy(A_OKAY, 0, response, 0, A_OKAY.size)
-            System.arraycopy(encrypted, 0, response, A_OKAY.size, encrypted.length)
+            //System.arraycopy(encrypted, 0, response, A_OKAY.size, encrypted.length)
+            response[2] = encrypted.toByte()
 
             return response
         }

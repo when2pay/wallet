@@ -38,6 +38,8 @@ import java.util.concurrent.CompletableFuture
 class SharedViewModel : ViewModel() {
     var walletPageTitle: String by mutableStateOf("My Wallet")
     var ensName: String by mutableStateOf("")
+    var privateKey: String = ""
+    var walletAddress: String = ""
 }
 
 class MainActivity : ComponentActivity() {
@@ -77,6 +79,10 @@ class MainActivity : ComponentActivity() {
             if (error == null) {
                 credentials = Credentials.create(web3Auth.getPrivkey())
                 web3 = Web3j.build(HttpService(rpcUrl))
+
+                sharedViewModel.privateKey = web3Auth.getPrivkey()
+                sharedViewModel.walletAddress = credentials.address
+
                 setContent {
                     WalletTheme {
                         Surface(modifier = Modifier.fillMaxSize()) {
@@ -122,6 +128,8 @@ class MainActivity : ComponentActivity() {
             // This will be used when making blockchain calls with Web3j
             Log.d("MainActivity_Web3Auth", "Login Success")
             credentials = Credentials.create(web3Auth.getPrivkey())
+            sharedViewModel.privateKey = web3Auth.getPrivkey();
+            sharedViewModel.walletAddress = credentials.address
             web3 = Web3j.build(HttpService(rpcUrl))
             recreate()
         }.exceptionally { error ->
